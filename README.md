@@ -48,6 +48,9 @@ library for Rust.
 }
 ```
 
+If you want to check MCP log, please use `tail -n 20 -f ~/Library/Logs/Claude/mcp*.log`.
+
+
 # References
 
 * MCP Specification: https://spec.modelcontextprotocol.io/
