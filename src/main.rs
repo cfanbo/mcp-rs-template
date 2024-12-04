@@ -2,7 +2,7 @@ mod mcp;
 
 use crate::mcp::prompts::{prompts_get, prompts_list};
 use crate::mcp::resources::{resource_read, resources_list};
-use crate::mcp::tools::register_tools;
+use crate::mcp::tools::{register_tools, tools_list};
 use crate::mcp::types::{
     CancelledNotification, JsonRpcError, JsonRpcResponse, ToolCallRequestParams,
 };
@@ -141,6 +141,9 @@ struct Args {
     /// start MCP server
     #[arg(long, default_value = "false")]
     mcp: bool,
+    /// output as json-rpc format
+    #[arg(long, default_value = "false")]
+    json: bool,
 }
 
 impl Args {
@@ -149,30 +152,47 @@ impl Args {
     }
 }
 
-fn display_info(args: &Args) {
+async fn display_info(args: &Args) {
     if !args.is_args_available() {
         println!("Please use --help to see available options");
         return;
     }
-    if args.prompts {
-        println!(
-            r#"prompts:
+    if args.json {
+        // output as json
+        if args.prompts {
+            let prompts = prompts_list(None).await.unwrap();
+            println!("{}", serde_json::to_string(&prompts).unwrap());
+        }
+        if args.resources {
+            let resources = resources_list(None).await.unwrap();
+            println!("{}", serde_json::to_string(&resources).unwrap());
+        }
+        if args.tools {
+            let tools = tools_list(None).await.unwrap();
+            println!("{}", serde_json::to_string(&tools).unwrap());
+        }
+    } else {
+        // output as text
+        if args.prompts {
+            println!(
+                r#"prompts:
 - current_time: get current time in city
 "#
-        );
-    }
-    if args.resources {
-        println!(
-            r#"resources:
+            );
+        }
+        if args.resources {
+            println!(
+                r#"resources:
 - sqlite: file:///path/to/sqlite.db
 "#
-        );
-    }
-    if args.tools {
-        println!(
-            r#"tools:
+            );
+        }
+        if args.tools {
+            println!(
+                r#"tools:
 - get_current_time_in_city: get current time in city
 "#
-        );
+            );
+        }
     }
 }
